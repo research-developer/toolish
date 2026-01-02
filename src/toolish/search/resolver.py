@@ -92,14 +92,18 @@ class Resolver:
 
             # Reconstruct tool from metadata
             metadata = result["metadata"]
+            # Parse predicates/objects, filtering empty strings from split
+            predicates = [p for p in metadata["predicates"].split(",") if p]
+            objects = [o for o in metadata["objects"].split(",") if o]
+
             tool = Tool(
                 id=metadata["id"],
                 service=metadata["service"],
                 route=ToolRoute(method=metadata["method"], path=metadata["path"]),
                 semantics=ToolSemantics(
                     canonical=metadata["canonical"],
-                    predicates=metadata["predicates"].split(","),
-                    objects=metadata["objects"].split(","),
+                    predicates=predicates,
+                    objects=objects,
                 ),
             )
 

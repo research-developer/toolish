@@ -41,7 +41,7 @@ class CatalogLoader:
 
     def load_manifest(self, manifest_path: Path) -> ServiceManifest:
         """Load a single manifest file."""
-        with open(manifest_path) as f:
+        with open(manifest_path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
         return ServiceManifest(**data)
 

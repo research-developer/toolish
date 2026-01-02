@@ -8,14 +8,32 @@ Embeddings-based semantic tool discovery. Matches natural language requests like
 # Install dependencies
 uv sync
 
-# Seed the database (18 sample tools)
+# Option 1: With 1Password (recommended for production)
+# The .env file contains 1Password secret references (op://...), not actual keys.
+# Secrets are injected at runtime via `op run` and never touch disk.
 PYTHONPATH=src op run --env-file=.env -- uv run python -m toolish.cli seed
-
-# Run the REPL
 PYTHONPATH=src op run --env-file=.env -- uv run python -m toolish.cli
+
+# Option 2: Direct environment variable (for development/testing)
+# If you don't have 1Password CLI, set OPENAI_API_KEY directly:
+export OPENAI_API_KEY="sk-..."
+export TOOLISH_MOCK_KEYCHAIN=1  # Use mock keychain instead of 1Password
+PYTHONPATH=src uv run python -m toolish.cli seed
+PYTHONPATH=src uv run python -m toolish.cli
 ```
 
-The `.env` file contains 1Password secret references (not actual keys), so secrets are injected at runtime via `op run` and never touch disk.
+### Seeding Options
+
+```bash
+# Seed with 18 hardcoded sample tools (default)
+python -m toolish.cli seed
+
+# Seed from YAML catalog (51 tools across AI, productivity, devtools)
+python -m toolish.cli seed --from-catalog
+
+# Seed specific category only
+python -m toolish.cli seed --from-catalog --category ai
+```
 
 ## Usage
 
@@ -48,7 +66,9 @@ Results (high confidence):
 - **ChromaDB**: Vector storage with 3 indices (canonical, predicates, objects)
 - **OpenAI embeddings**: `text-embedding-3-small` for semantic similarity
 - **Three-way join**: Ranks by semantic score × connection status weight
-- **Mock keychain**: Simulates OAuth connections and 1Password credentials
+- **Keychain providers**: Pluggable keychain layer with both a 1Password-backed keychain and a mock keychain for testing/demo
+
+By default, Toolish uses the 1Password-backed keychain (via `op run` and secret references in `.env`). To use the mock keychain instead, set `TOOLISH_MOCK_KEYCHAIN=1` before running the CLI.
 
 ## Project Structure
 

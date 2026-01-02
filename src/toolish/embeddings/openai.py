@@ -35,24 +35,49 @@ def get_client() -> OpenAI:
     return OpenAI(api_key=api_key)
 
 
+class EmbeddingError(Exception):
+    """Raised when embedding generation fails."""
+
+    pass
+
+
 def embed_text(text: str) -> list[float]:
-    """Generate embedding for a single text string."""
+    """Generate embedding for a single text string.
+
+    Raises:
+        EmbeddingError: If the API call fails
+    """
     client = get_client()
-    response = client.embeddings.create(input=text, model=MODEL)
-    return response.data[0].embedding
+    try:
+        response = client.embeddings.create(input=text, model=MODEL)
+        return response.data[0].embedding
+    except Exception as e:
+        raise EmbeddingError(f"Failed to generate embedding: {e}") from e
 
 
 def embed_batch(texts: list[str]) -> list[list[float]]:
-    """Generate embeddings for multiple texts in a single API call."""
+    """Generate embeddings for multiple texts in a single API call.
+
+    Raises:
+        EmbeddingError: If the API call fails
+    """
     if not texts:
         return []
     client = get_client()
-    response = client.embeddings.create(input=texts, model=MODEL)
-    return [item.embedding for item in sorted(response.data, key=lambda x: x.index)]
+    try:
+        response = client.embeddings.create(input=texts, model=MODEL)
+        return [item.embedding for item in sorted(response.data, key=lambda x: x.index)]
+    except Exception as e:
+        raise EmbeddingError(f"Failed to generate batch embeddings: {e}") from e
 
 
 def embed_centroid(texts: list[str]) -> list[float]:
-    """Generate centroid embedding (average) for a list of texts."""
+    """Generate centroid embedding (average) for a list of texts.
+
+    Raises:
+        ValueError: If texts is empty
+        EmbeddingError: If the API call fails
+    """
     if not texts:
         raise ValueError("Cannot compute centroid of empty list")
 

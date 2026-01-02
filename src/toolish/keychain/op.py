@@ -82,7 +82,11 @@ class OnePasswordKeychain(KeychainProvider):
         if result.returncode != 0:
             error_msg = result.stderr.strip() or "Unknown error"
             raise RuntimeError(f"1Password CLI failed: {error_msg}")
-        return json.loads(result.stdout)
+
+        try:
+            return json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            raise RuntimeError(f"1Password CLI returned invalid JSON: {e}")
 
     def _list_items(self) -> list[dict]:
         """Get all items from the vault (cached)."""
@@ -114,7 +118,9 @@ class OnePasswordKeychain(KeychainProvider):
             # Remove port
             domain = domain.split(":")[0]
             return domain.lower() if domain else None
-        except Exception:
+        except (ValueError, AttributeError):
+            # urlparse can raise ValueError for invalid URLs
+            # AttributeError if url is not a string-like object
             return None
 
     def _map_domain(self, domain: str) -> str:
@@ -236,11 +242,13 @@ class OnePasswordKeychain(KeychainProvider):
                             ["op", "read", reference],
                             capture_output=True,
                             text=True,
+                            timeout=30,
                         )
                         if result.returncode == 0:
                             return result.stdout.strip()
-                    except Exception:
-                        pass
+                    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+                        # CLI not installed, timed out, or OS-level error
+                        return None
 
         # If not found in API Keys, check other fields
         for f in item.get("fields", []):
@@ -253,11 +261,13 @@ class OnePasswordKeychain(KeychainProvider):
                             ["op", "read", reference],
                             capture_output=True,
                             text=True,
+                            timeout=30,
                         )
                         if result.returncode == 0:
                             return result.stdout.strip()
-                    except Exception:
-                        pass
+                    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+                        # CLI not installed, timed out, or OS-level error
+                        return None
 
         return None
 

@@ -93,9 +93,9 @@ tools:
       types: [json]
     semantics:
       canonical: "transcribe audio with Whisper"
-      predicates: [transcribe, convert, recognize, speech-to-text]
-      objects: [audio, speech, recording, voice, sound]
-      contexts: [transcription, speech recognition, audio processing]
+      predicates: [transcribe, convert, recognize, speech-to-text, stt]
+      objects: [audio, speech, recording, voice, sound, conversation, interview]
+      contexts: [transcription, speech recognition, audio processing, dictation]
       not: [generate speech, translate]
     params:
       model:
@@ -106,3 +106,36 @@ tools:
         type: file
         required: true
         description: "Audio file to transcribe"
+      language:
+        type: string
+        required: false
+        description: "Input language (ISO-639-1 code)"
+      response_format:
+        type: string
+        required: false
+        description: "Output format (json, text, srt, vtt)"
+
+  - id: "openai-audio-translation"
+    route:
+      method: POST
+      path: /audio/translations
+      types: [json]
+    semantics:
+      canonical: "translate audio to English with Whisper"
+      predicates: [translate, convert, transcribe]
+      objects: [audio, speech, foreign language, recording]
+      contexts: [translation, multilingual, localization]
+      not: [transcribe same language]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Whisper model (whisper-1)"
+      file:
+        type: file
+        required: true
+        description: "Audio file to translate"
+      response_format:
+        type: string
+        required: false
+        description: "Output format (json, text, srt, vtt)"

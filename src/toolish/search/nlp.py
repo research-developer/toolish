@@ -176,12 +176,16 @@ recipient: Sarah
 topic: the meeting
 confidence: 0.95"""
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0,
-        max_tokens=150,
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0,
+            max_tokens=150,
+        )
+    except Exception:
+        # API error (network, rate limit, auth failure) - fall back to simple extraction
+        return extract_simple(query)
 
     text = response.choices[0].message.content or ""
 
