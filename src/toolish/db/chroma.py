@@ -47,12 +47,20 @@ class ToolDatabase:
             ids=[tool.id], embeddings=[canonical_emb], metadatas=[metadata]
         )
 
-        # 2. Predicate centroid
-        pred_emb = embed_centroid(tool.semantics.predicates)
+        # 2. Predicate centroid (fallback to canonical if empty)
+        pred_emb = (
+            embed_centroid(tool.semantics.predicates)
+            if tool.semantics.predicates
+            else canonical_emb
+        )
         self.predicates.upsert(ids=[tool.id], embeddings=[pred_emb], metadatas=[metadata])
 
-        # 3. Object centroid
-        obj_emb = embed_centroid(tool.semantics.objects)
+        # 3. Object centroid (fallback to canonical if empty)
+        obj_emb = (
+            embed_centroid(tool.semantics.objects)
+            if tool.semantics.objects
+            else canonical_emb
+        )
         self.objects.upsert(ids=[tool.id], embeddings=[obj_emb], metadatas=[metadata])
 
     def search(
@@ -118,6 +126,15 @@ class ToolDatabase:
         # Sort by weighted score
         ranked = sorted(scores.values(), key=lambda x: x["weighted_score"], reverse=True)
         return ranked[:top_k]
+
+    def register_tools(self, tools: list[Tool]) -> None:
+        """Register multiple tools efficiently.
+
+        While ChromaDB's upsert handles batching internally,
+        this method provides a cleaner API for bulk registration.
+        """
+        for tool in tools:
+            self.register_tool(tool)
 
     def get_all_tools(self) -> list[dict[str, Any]]:
         """Get all registered tools (metadata only)."""

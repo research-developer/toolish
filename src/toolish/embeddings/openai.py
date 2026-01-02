@@ -7,9 +7,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# Load .env from project root
+# Project root for .env loading
 _project_root = Path(__file__).parent.parent.parent.parent
-load_dotenv(_project_root / ".env")
+_dotenv_loaded = False
+
+
+def _ensure_dotenv() -> None:
+    """Lazily load .env file on first access."""
+    global _dotenv_loaded
+    if not _dotenv_loaded:
+        load_dotenv(_project_root / ".env")
+        _dotenv_loaded = True
+
 
 # Embedding model config
 MODEL = "text-embedding-3-small"
@@ -19,6 +28,7 @@ DIMENSIONS = 1536
 @lru_cache(maxsize=1)
 def get_client() -> OpenAI:
     """Get cached OpenAI client."""
+    _ensure_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise ValueError("OPENAI_API_KEY environment variable not set")

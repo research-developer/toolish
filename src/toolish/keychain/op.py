@@ -65,13 +65,20 @@ class OnePasswordKeychain(KeychainProvider):
         """Execute op CLI command and parse JSON output.
 
         Raises:
-            RuntimeError: If op command fails
+            RuntimeError: If op command fails or CLI not installed
         """
-        result = subprocess.run(
-            ["op", *args, "--format=json"],
-            capture_output=True,
-            text=True,
-        )
+        try:
+            result = subprocess.run(
+                ["op", *args, "--format=json"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+        except FileNotFoundError:
+            raise RuntimeError("1Password CLI (op) not installed")
+        except subprocess.TimeoutExpired:
+            raise RuntimeError("1Password CLI timed out")
+
         if result.returncode != 0:
             error_msg = result.stderr.strip() or "Unknown error"
             raise RuntimeError(f"1Password CLI failed: {error_msg}")
@@ -137,6 +144,27 @@ class OnePasswordKeychain(KeychainProvider):
                 return True
         return False
 
+    def _classify_all_domains(self) -> tuple[list[str], list[str]]:
+        """Classify all domains as connected or keychain in one pass.
+
+        This avoids N+1 API calls by processing all domains together
+        and leveraging the _item_details_cache.
+
+        Returns:
+            Tuple of (connected_domains, keychain_domains)
+        """
+        connected: list[str] = []
+        keychain: list[str] = []
+
+        for domain, item_id in self._extract_domains().items():
+            item = self._get_item(item_id)
+            if item and self._has_api_keys_section(item):
+                connected.append(domain)
+            elif item:
+                keychain.append(domain)
+
+        return sorted(connected), sorted(keychain)
+
     def get_service_status(self, service_domain: str) -> ToolStatus:
         """Determine connection status for a service domain."""
         domains = self._extract_domains()
@@ -157,21 +185,11 @@ class OnePasswordKeychain(KeychainProvider):
 
     def list_connected(self) -> list[str]:
         """List services that have API Keys sections."""
-        connected = []
-        for domain, item_id in self._extract_domains().items():
-            item = self._get_item(item_id)
-            if item and self._has_api_keys_section(item):
-                connected.append(domain)
-        return sorted(connected)
+        return self._classify_all_domains()[0]
 
     def list_keychain(self) -> list[str]:
         """List services with URLs but no API Keys section."""
-        keychain = []
-        for domain, item_id in self._extract_domains().items():
-            item = self._get_item(item_id)
-            if item and not self._has_api_keys_section(item):
-                keychain.append(domain)
-        return sorted(keychain)
+        return self._classify_all_domains()[1]
 
     def list_available(self) -> list[str]:
         """List known services not in keychain.

@@ -1,10 +1,13 @@
 """Seed database with sample tools for testing."""
 
 import argparse
+import logging
 
 from toolish.catalog import load_catalog
 from toolish.db.chroma import ToolDatabase
 from toolish.models.tool import Tool, ToolParams, ToolRoute, ToolSemantics
+
+logger = logging.getLogger(__name__)
 
 # 18 sample tools across various services
 SAMPLE_TOOLS: list[Tool] = [
@@ -260,27 +263,29 @@ def seed_database(
         db = ToolDatabase()
 
     if clear_first:
-        print("Clearing existing data...")
+        logger.info("Clearing existing data...")
         db.clear()
 
     if from_catalog:
         # Load tools from YAML catalog
         if category:
-            print(f"Loading tools from catalog/{category}/...")
+            logger.info("Loading tools from catalog/%s/...", category)
             tools = load_catalog(category=category)
         else:
-            print("Loading tools from catalog/...")
+            logger.info("Loading tools from catalog/...")
             tools = load_catalog()
     else:
         # Use hardcoded sample tools
         tools = SAMPLE_TOOLS
 
-    print(f"Seeding {len(tools)} tools...")
+    logger.info("Seeding %d tools...", len(tools))
     for tool in tools:
-        print(f"  - {tool.id}: {tool.semantics.canonical}")
-        db.register_tool(tool)
+        logger.debug("  - %s: %s", tool.id, tool.semantics.canonical)
 
-    print("Done!")
+    # Use batch registration
+    db.register_tools(tools)
+
+    logger.info("Done!")
     return len(tools)
 
 

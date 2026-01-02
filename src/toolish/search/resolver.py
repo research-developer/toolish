@@ -73,6 +73,8 @@ class Resolver:
 
         # Step 3 & 4: Classify and score each match
         matches: list[ToolMatch] = []
+        keychain = get_keychain()  # Fetch once, outside loop
+
         for result in search_results:
             semantic_score = result["weighted_score"]
 
@@ -82,7 +84,6 @@ class Resolver:
 
             # Get service status from keychain
             service = result["metadata"]["service"]
-            keychain = get_keychain()
             status = keychain.get_service_status(service)
 
             # Skip unavailable

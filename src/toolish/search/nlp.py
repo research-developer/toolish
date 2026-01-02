@@ -7,8 +7,18 @@ Extracts semantic structure from user requests like:
 import os
 import re
 from dataclasses import dataclass
+from functools import lru_cache
 
 from openai import OpenAI
+
+
+@lru_cache(maxsize=1)
+def _get_openai_client() -> OpenAI | None:
+    """Get cached OpenAI client, or None if API key not set."""
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None
+    return OpenAI(api_key=api_key)
 
 # Common predicate mappings (fallback for non-LLM extraction)
 PREDICATE_MAP: dict[str, str] = {
@@ -143,11 +153,9 @@ def extract_simple(query: str) -> Extraction:
 
 def extract_with_llm(query: str) -> Extraction:
     """LLM-based extraction for better semantic understanding."""
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
+    client = _get_openai_client()
+    if not client:
         return extract_simple(query)
-
-    client = OpenAI(api_key=api_key)
 
     prompt = f"""Extract the semantic components from this user request.
 

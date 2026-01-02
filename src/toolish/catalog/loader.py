@@ -1,11 +1,15 @@
 """Load WebSpec manifests from YAML files."""
 
+import logging
+from itertools import chain
 from pathlib import Path
 
 import yaml
 
 from toolish.models.manifest import ServiceManifest
 from toolish.models.tool import Tool
+
+logger = logging.getLogger(__name__)
 
 
 class CatalogLoader:
@@ -50,9 +54,9 @@ class CatalogLoader:
                 manifest = self.load_manifest(manifest_path)
                 tools = manifest.to_tools()
                 all_tools.extend(tools)
-                print(f"  Loaded {len(tools)} tools from {manifest_path.name}")
+                logger.info("Loaded %d tools from %s", len(tools), manifest_path.name)
             except Exception as e:
-                print(f"  Warning: Failed to load {manifest_path}: {e}")
+                logger.warning("Failed to load %s: %s", manifest_path, e)
 
         return all_tools
 
@@ -63,14 +67,15 @@ class CatalogLoader:
             return []
 
         tools: list[Tool] = []
-        for manifest_path in sorted(category_path.glob("*.yaml")) + sorted(
-            category_path.glob("*.yml")
+        for manifest_path in chain(
+            sorted(category_path.glob("*.yaml")),
+            sorted(category_path.glob("*.yml")),
         ):
             try:
                 manifest = self.load_manifest(manifest_path)
                 tools.extend(manifest.to_tools())
             except Exception as e:
-                print(f"  Warning: Failed to load {manifest_path}: {e}")
+                logger.warning("Failed to load %s: %s", manifest_path, e)
 
         return tools
 
