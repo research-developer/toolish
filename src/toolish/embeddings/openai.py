@@ -1,0 +1,89 @@
+"""OpenAI embedding client for semantic vector generation."""
+
+import os
+from functools import lru_cache
+from pathlib import Path
+
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Project root for .env loading
+_project_root = Path(__file__).parent.parent.parent.parent
+_dotenv_loaded = False
+
+
+def _ensure_dotenv() -> None:
+    """Lazily load .env file on first access."""
+    global _dotenv_loaded
+    if not _dotenv_loaded:
+        load_dotenv(_project_root / ".env")
+        _dotenv_loaded = True
+
+
+# Embedding model config
+MODEL = "text-embedding-3-small"
+DIMENSIONS = 1536
+
+
+@lru_cache(maxsize=1)
+def get_client() -> OpenAI:
+    """Get cached OpenAI client."""
+    _ensure_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY environment variable not set")
+    return OpenAI(api_key=api_key)
+
+
+class EmbeddingError(Exception):
+    """Raised when embedding generation fails."""
+
+    pass
+
+
+def embed_text(text: str) -> list[float]:
+    """Generate embedding for a single text string.
+
+    Raises:
+        EmbeddingError: If the API call fails
+    """
+    client = get_client()
+    try:
+        response = client.embeddings.create(input=text, model=MODEL)
+        return response.data[0].embedding
+    except Exception as e:
+        raise EmbeddingError(f"Failed to generate embedding: {e}") from e
+
+
+def embed_batch(texts: list[str]) -> list[list[float]]:
+    """Generate embeddings for multiple texts in a single API call.
+
+    Raises:
+        EmbeddingError: If the API call fails
+    """
+    if not texts:
+        return []
+    client = get_client()
+    try:
+        response = client.embeddings.create(input=texts, model=MODEL)
+        return [item.embedding for item in sorted(response.data, key=lambda x: x.index)]
+    except Exception as e:
+        raise EmbeddingError(f"Failed to generate batch embeddings: {e}") from e
+
+
+def embed_centroid(texts: list[str]) -> list[float]:
+    """Generate centroid embedding (average) for a list of texts.
+
+    Raises:
+        ValueError: If texts is empty
+        EmbeddingError: If the API call fails
+    """
+    if not texts:
+        raise ValueError("Cannot compute centroid of empty list")
+
+    embeddings = embed_batch(texts)
+
+    # Compute element-wise average
+    n = len(embeddings)
+    centroid = [sum(emb[i] for emb in embeddings) / n for i in range(DIMENSIONS)]
+    return centroid

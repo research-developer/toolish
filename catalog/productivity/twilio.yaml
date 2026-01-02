@@ -1,0 +1,131 @@
+service:
+  name: "Twilio"
+  id: "twilio"
+  description: "Cloud communications platform for SMS, voice, and messaging"
+  icon: "https://www.twilio.com/favicon.ico"
+  homepage: "https://www.twilio.com"
+  canonical_domains:
+    - api.twilio.com
+    - twilio.com
+
+oauth:
+  authorization_url: null
+  token_url: null
+  scopes: []
+
+tools:
+  - id: "twilio-send-sms"
+    route:
+      method: POST
+      path: /2010-04-01/Accounts/{AccountSid}/Messages.json
+      types: [json]
+    semantics:
+      canonical: "send SMS via Twilio"
+      predicates: [send, text, sms, message, notify, alert]
+      objects: [sms, text message, text, notification, alert]
+      contexts: [sms messaging, mobile notifications, alerts, two-factor auth]
+      not: [make call, send whatsapp]
+    params:
+      To:
+        type: string
+        required: true
+        description: "Recipient phone number (E.164 format)"
+      From:
+        type: string
+        required: true
+        description: "Twilio phone number to send from"
+      Body:
+        type: string
+        required: true
+        description: "SMS message body"
+      StatusCallback:
+        type: string
+        required: false
+        description: "Webhook URL for status updates"
+
+  - id: "twilio-make-call"
+    route:
+      method: POST
+      path: /2010-04-01/Accounts/{AccountSid}/Calls.json
+      types: [json]
+    semantics:
+      canonical: "make phone call via Twilio"
+      predicates: [call, dial, phone, ring, connect]
+      objects: [call, phone call, voice call, connection]
+      contexts: [voice communication, phone calls, automated calling]
+      not: [send sms, send whatsapp]
+    params:
+      To:
+        type: string
+        required: true
+        description: "Phone number to call (E.164 format)"
+      From:
+        type: string
+        required: true
+        description: "Twilio phone number to call from"
+      Url:
+        type: string
+        required: true
+        description: "TwiML URL for call instructions"
+      StatusCallback:
+        type: string
+        required: false
+        description: "Webhook URL for call status"
+
+  - id: "twilio-send-whatsapp"
+    route:
+      method: POST
+      path: /2010-04-01/Accounts/{AccountSid}/Messages.json
+      types: [json]
+    semantics:
+      canonical: "send WhatsApp message via Twilio"
+      predicates: [send, message, whatsapp, notify]
+      objects: [whatsapp message, message, notification]
+      contexts: [whatsapp messaging, instant messaging]
+      not: [send sms, make call]
+    params:
+      To:
+        type: string
+        required: true
+        description: "WhatsApp number (whatsapp:+1234567890)"
+      From:
+        type: string
+        required: true
+        description: "Twilio WhatsApp number"
+      Body:
+        type: string
+        required: true
+        description: "Message body"
+      MediaUrl:
+        type: array
+        required: false
+        description: "Media URLs to attach"
+
+  - id: "twilio-list-messages"
+    route:
+      method: GET
+      path: /2010-04-01/Accounts/{AccountSid}/Messages.json
+      types: [json]
+    semantics:
+      canonical: "list messages from Twilio"
+      predicates: [list, get, fetch, find, check, view, search]
+      objects: [messages, sms, texts, history, logs]
+      contexts: [message history, logs, reporting]
+      not: [send sms, send whatsapp]
+    params:
+      To:
+        type: string
+        required: false
+        description: "Filter by recipient"
+      From:
+        type: string
+        required: false
+        description: "Filter by sender"
+      DateSent:
+        type: string
+        required: false
+        description: "Filter by date sent"
+      PageSize:
+        type: integer
+        required: false
+        description: "Number of results per page"

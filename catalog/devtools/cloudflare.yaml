@@ -1,0 +1,160 @@
+service:
+  name: "Cloudflare"
+  id: "cloudflare"
+  description: "Web infrastructure and security platform"
+  icon: "https://www.cloudflare.com/favicon.ico"
+  homepage: "https://www.cloudflare.com"
+  canonical_domains:
+    - cloudflare.com
+    - api.cloudflare.com
+
+oauth:
+  authorization_url: null
+  token_url: null
+  scopes: []
+
+tools:
+  - id: "cloudflare-list-zones"
+    route:
+      method: GET
+      path: /client/v4/zones
+      types: [json]
+    semantics:
+      canonical: "list zones in Cloudflare"
+      predicates: [list, get, fetch, find, show, view]
+      objects: [zones, domains, sites, websites]
+      contexts: [dns management, web infrastructure]
+      not: [create zone, list dns records]
+    params:
+      name:
+        type: string
+        required: false
+        description: "Filter by zone name"
+      status:
+        type: string
+        required: false
+        description: "Filter by status (active, pending)"
+      per_page:
+        type: integer
+        required: false
+        description: "Results per page (max 50)"
+
+  - id: "cloudflare-list-dns-records"
+    route:
+      method: GET
+      path: /client/v4/zones/{zone_id}/dns_records
+      types: [json]
+    semantics:
+      canonical: "list DNS records in Cloudflare"
+      predicates: [list, get, fetch, find, show, view, check]
+      objects: [dns records, records, dns, a records, cname]
+      contexts: [dns management, domain configuration]
+      not: [create dns record, delete dns record]
+    params:
+      zone_id:
+        type: string
+        required: true
+        description: "Zone ID"
+      type:
+        type: string
+        required: false
+        description: "Record type (A, AAAA, CNAME, MX, TXT)"
+      name:
+        type: string
+        required: false
+        description: "Filter by record name"
+
+  - id: "cloudflare-create-dns-record"
+    route:
+      method: POST
+      path: /client/v4/zones/{zone_id}/dns_records
+      types: [json]
+    semantics:
+      canonical: "create DNS record in Cloudflare"
+      predicates: [create, add, set, configure, point]
+      objects: [dns record, record, a record, cname, mx record, txt record]
+      contexts: [dns management, domain configuration, hosting]
+      not: [delete dns record, update dns record]
+    params:
+      zone_id:
+        type: string
+        required: true
+        description: "Zone ID"
+      type:
+        type: string
+        required: true
+        description: "Record type (A, AAAA, CNAME, MX, TXT)"
+      name:
+        type: string
+        required: true
+        description: "DNS record name"
+      content:
+        type: string
+        required: true
+        description: "Record content (IP, hostname, etc.)"
+      ttl:
+        type: integer
+        required: false
+        description: "TTL in seconds (1 = automatic)"
+      proxied:
+        type: boolean
+        required: false
+        description: "Enable Cloudflare proxy"
+
+  - id: "cloudflare-purge-cache"
+    route:
+      method: POST
+      path: /client/v4/zones/{zone_id}/purge_cache
+      types: [json]
+    semantics:
+      canonical: "purge cache in Cloudflare"
+      predicates: [purge, clear, flush, invalidate, refresh]
+      objects: [cache, cdn cache, cached content, assets]
+      contexts: [cdn, caching, performance, content delivery]
+      not: [list cache, cache settings]
+    params:
+      zone_id:
+        type: string
+        required: true
+        description: "Zone ID"
+      purge_everything:
+        type: boolean
+        required: false
+        description: "Purge all cached content"
+      files:
+        type: array
+        required: false
+        description: "Specific URLs to purge"
+      tags:
+        type: array
+        required: false
+        description: "Cache tags to purge"
+
+  - id: "cloudflare-deploy-worker"
+    route:
+      method: PUT
+      path: /client/v4/accounts/{account_id}/workers/scripts/{script_name}
+      types: [json, multipart]
+    semantics:
+      canonical: "deploy Worker script to Cloudflare"
+      predicates: [deploy, publish, upload, create, update, push]
+      objects: [worker, script, edge function, serverless function]
+      contexts: [edge computing, serverless, workers, functions]
+      not: [delete worker, list workers]
+    params:
+      account_id:
+        type: string
+        required: true
+        description: "Account ID"
+      script_name:
+        type: string
+        required: true
+        description: "Worker script name"
+      script:
+        type: file
+        required: true
+        description: "Worker script content"
+      bindings:
+        type: array
+        required: false
+        description: "Environment bindings (KV, R2, etc.)"

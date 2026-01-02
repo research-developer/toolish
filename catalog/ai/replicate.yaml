@@ -1,0 +1,71 @@
+service:
+  name: "Replicate"
+  id: "replicate"
+  description: "Run machine learning models in the cloud"
+  icon: "https://replicate.com/favicon.ico"
+  homepage: "https://replicate.com"
+  canonical_domains:
+    - api.replicate.com
+
+oauth:
+  authorization_url: null
+  token_url: null
+  scopes: []
+
+tools:
+  - id: "replicate-create-prediction"
+    route:
+      method: POST
+      path: /predictions
+      types: [json]
+    semantics:
+      canonical: "run ML model prediction on Replicate"
+      predicates: [run, predict, generate, execute, infer]
+      objects: [prediction, model, inference, output, result]
+      contexts: [machine learning, ai models, inference, cloud ML]
+      not: [train model, fine-tune]
+    params:
+      version:
+        type: string
+        required: true
+        description: "Model version ID"
+      input:
+        type: object
+        required: true
+        description: "Model input parameters"
+      webhook:
+        type: string
+        required: false
+        description: "Webhook URL for completion notification"
+
+  - id: "replicate-get-prediction"
+    route:
+      method: GET
+      path: /predictions/{id}
+      types: [json]
+    semantics:
+      canonical: "get prediction status from Replicate"
+      predicates: [get, check, status, retrieve, fetch]
+      objects: [prediction, status, result, output]
+      contexts: [monitoring, async operations]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Prediction ID"
+
+  - id: "replicate-list-models"
+    route:
+      method: GET
+      path: /models
+      types: [json]
+    semantics:
+      canonical: "list available models on Replicate"
+      predicates: [list, browse, search, find, discover]
+      objects: [models, catalog, collection]
+      contexts: [model discovery, browsing]
+    params:
+      cursor:
+        type: string
+        required: false
+        description: "Pagination cursor"

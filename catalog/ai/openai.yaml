@@ -1,0 +1,141 @@
+service:
+  name: "OpenAI"
+  id: "openai"
+  description: "GPT models, embeddings, image generation, and audio capabilities"
+  icon: "https://openai.com/favicon.ico"
+  homepage: "https://openai.com"
+  canonical_domains:
+    - api.openai.com
+
+oauth:
+  authorization_url: "https://platform.openai.com/oauth/authorize"
+  token_url: "https://platform.openai.com/oauth/token"
+  scopes:
+    - "model.read"
+    - "model.request"
+
+tools:
+  - id: "openai-chat-completion"
+    route:
+      method: POST
+      path: /chat/completions
+      types: [json]
+    semantics:
+      canonical: "generate chat completion with GPT"
+      predicates: [generate, complete, ask, chat, prompt, query, converse]
+      objects: [completion, response, text, answer, message, chat]
+      contexts: [ai generation, language model, chatbot, conversation]
+      not: [embed text, create image, transcribe audio]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Model ID (gpt-4, gpt-4-turbo, gpt-3.5-turbo)"
+      messages:
+        type: array
+        required: true
+        description: "Conversation messages array"
+      temperature:
+        type: number
+        required: false
+        description: "Sampling temperature (0-2)"
+
+  - id: "openai-embeddings"
+    route:
+      method: POST
+      path: /embeddings
+      types: [json]
+    semantics:
+      canonical: "generate text embeddings with OpenAI"
+      predicates: [embed, encode, vectorize, represent]
+      objects: [text, embedding, vector, representation]
+      contexts: [semantic search, similarity, machine learning]
+      not: [generate text, create image]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Embedding model (text-embedding-3-small, text-embedding-3-large)"
+      input:
+        type: string
+        required: true
+        description: "Text to embed"
+
+  - id: "openai-image-generation"
+    route:
+      method: POST
+      path: /images/generations
+      types: [json]
+    semantics:
+      canonical: "generate image with DALL-E"
+      predicates: [generate, create, make, draw, render, imagine]
+      objects: [image, picture, artwork, illustration, visual]
+      contexts: [image generation, ai art, creative, visual content]
+      not: [edit image, generate text]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Image model (dall-e-3, dall-e-2)"
+      prompt:
+        type: string
+        required: true
+        description: "Text description of desired image"
+      size:
+        type: string
+        required: false
+        description: "Image size (1024x1024, 1792x1024, 1024x1792)"
+
+  - id: "openai-audio-transcription"
+    route:
+      method: POST
+      path: /audio/transcriptions
+      types: [json]
+    semantics:
+      canonical: "transcribe audio with Whisper"
+      predicates: [transcribe, convert, recognize, speech-to-text, stt]
+      objects: [audio, speech, recording, voice, sound, conversation, interview]
+      contexts: [transcription, speech recognition, audio processing, dictation]
+      not: [generate speech, translate]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Whisper model (whisper-1)"
+      file:
+        type: file
+        required: true
+        description: "Audio file to transcribe"
+      language:
+        type: string
+        required: false
+        description: "Input language (ISO-639-1 code)"
+      response_format:
+        type: string
+        required: false
+        description: "Output format (json, text, srt, vtt)"
+
+  - id: "openai-audio-translation"
+    route:
+      method: POST
+      path: /audio/translations
+      types: [json]
+    semantics:
+      canonical: "translate audio to English with Whisper"
+      predicates: [translate, convert, transcribe]
+      objects: [audio, speech, foreign language, recording]
+      contexts: [translation, multilingual, localization]
+      not: [transcribe same language]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Whisper model (whisper-1)"
+      file:
+        type: file
+        required: true
+        description: "Audio file to translate"
+      response_format:
+        type: string
+        required: false
+        description: "Output format (json, text, srt, vtt)"

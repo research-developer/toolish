@@ -1,0 +1,84 @@
+service:
+  name: "Hugging Face"
+  id: "huggingface"
+  description: "ML model hub and inference API"
+  icon: "https://huggingface.co/favicon.ico"
+  homepage: "https://huggingface.co"
+  canonical_domains:
+    - api-inference.huggingface.co
+    - huggingface.co
+
+oauth:
+  authorization_url: null
+  token_url: null
+  scopes: []
+
+tools:
+  - id: "huggingface-inference"
+    route:
+      method: POST
+      path: /models/{model_id}
+      types: [json]
+    semantics:
+      canonical: "run inference on Hugging Face model"
+      predicates: [run, infer, predict, generate, process]
+      objects: [model, inference, prediction, output]
+      contexts: [machine learning, nlp, computer vision, transformers]
+      not: [train, fine-tune, deploy]
+    params:
+      model_id:
+        type: string
+        required: true
+        description: "Model ID (e.g., gpt2, bert-base-uncased)"
+      inputs:
+        type: string
+        required: true
+        description: "Input text or data"
+      parameters:
+        type: object
+        required: false
+        description: "Model-specific parameters"
+
+  - id: "huggingface-text-generation"
+    route:
+      method: POST
+      path: /models/{model_id}
+      types: [json]
+    semantics:
+      canonical: "generate text with Hugging Face model"
+      predicates: [generate, complete, write, create]
+      objects: [text, completion, content, output]
+      contexts: [text generation, language model, nlp]
+    params:
+      model_id:
+        type: string
+        required: true
+        description: "Text generation model ID"
+      inputs:
+        type: string
+        required: true
+        description: "Prompt text"
+      max_new_tokens:
+        type: integer
+        required: false
+        description: "Maximum tokens to generate"
+
+  - id: "huggingface-feature-extraction"
+    route:
+      method: POST
+      path: /models/{model_id}
+      types: [json]
+    semantics:
+      canonical: "extract features/embeddings with Hugging Face"
+      predicates: [extract, embed, encode, vectorize]
+      objects: [features, embeddings, vectors, representations]
+      contexts: [embeddings, semantic search, similarity]
+    params:
+      model_id:
+        type: string
+        required: true
+        description: "Feature extraction model ID"
+      inputs:
+        type: string
+        required: true
+        description: "Text to encode"
