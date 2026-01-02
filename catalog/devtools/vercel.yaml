@@ -1,0 +1,137 @@
+service:
+  name: "Vercel"
+  id: "vercel"
+  description: "Frontend cloud platform for deployment and hosting"
+  icon: "https://vercel.com/favicon.ico"
+  homepage: "https://vercel.com"
+  canonical_domains:
+    - vercel.com
+    - vercel.app
+    - api.vercel.com
+
+oauth:
+  authorization_url: "https://vercel.com/oauth/authorize"
+  token_url: "https://api.vercel.com/v2/oauth/access_token"
+  scopes: []
+
+tools:
+  - id: "vercel-create-deployment"
+    route:
+      method: POST
+      path: /v13/deployments
+      types: [json]
+    semantics:
+      canonical: "create deployment on Vercel"
+      predicates: [deploy, publish, ship, release, launch, push]
+      objects: [deployment, site, app, website, build]
+      contexts: [deployment, hosting, frontend, jamstack, ci/cd]
+      not: [delete deployment, list deployments]
+    params:
+      name:
+        type: string
+        required: true
+        description: "Project name"
+      gitSource:
+        type: object
+        required: false
+        description: "Git source configuration"
+      target:
+        type: string
+        required: false
+        description: "Deployment target (production, preview)"
+      projectSettings:
+        type: object
+        required: false
+        description: "Build and output settings"
+
+  - id: "vercel-list-deployments"
+    route:
+      method: GET
+      path: /v6/deployments
+      types: [json]
+    semantics:
+      canonical: "list deployments on Vercel"
+      predicates: [list, get, fetch, find, show, view, check]
+      objects: [deployments, builds, releases, history]
+      contexts: [deployment history, monitoring]
+      not: [create deployment, delete deployment]
+    params:
+      projectId:
+        type: string
+        required: false
+        description: "Filter by project ID"
+      state:
+        type: string
+        required: false
+        description: "Filter by state (READY, ERROR, BUILDING)"
+      limit:
+        type: integer
+        required: false
+        description: "Number of results (max 100)"
+
+  - id: "vercel-list-projects"
+    route:
+      method: GET
+      path: /v9/projects
+      types: [json]
+    semantics:
+      canonical: "list projects on Vercel"
+      predicates: [list, get, fetch, find, show, view]
+      objects: [projects, apps, sites, applications]
+      contexts: [project management, organization]
+      not: [create project, list deployments]
+    params:
+      limit:
+        type: integer
+        required: false
+        description: "Number of results"
+      from:
+        type: integer
+        required: false
+        description: "Pagination timestamp"
+
+  - id: "vercel-get-deployment-logs"
+    route:
+      method: GET
+      path: /v2/deployments/{id}/events
+      types: [json]
+    semantics:
+      canonical: "get deployment logs from Vercel"
+      predicates: [get, fetch, view, check, read, tail]
+      objects: [logs, events, output, build logs, errors]
+      contexts: [debugging, monitoring, troubleshooting]
+      not: [create deployment, list deployments]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Deployment ID"
+      follow:
+        type: boolean
+        required: false
+        description: "Stream logs in real-time"
+
+  - id: "vercel-add-domain"
+    route:
+      method: POST
+      path: /v10/projects/{projectId}/domains
+      types: [json]
+    semantics:
+      canonical: "add custom domain to Vercel project"
+      predicates: [add, configure, set, assign, connect, link]
+      objects: [domain, custom domain, url, hostname]
+      contexts: [domain configuration, dns, hosting]
+      not: [remove domain, list domains]
+    params:
+      projectId:
+        type: string
+        required: true
+        description: "Project ID"
+      name:
+        type: string
+        required: true
+        description: "Domain name to add"
+      redirect:
+        type: string
+        required: false
+        description: "Redirect target domain"

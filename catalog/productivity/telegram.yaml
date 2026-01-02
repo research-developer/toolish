@@ -1,0 +1,120 @@
+service:
+  name: "Telegram"
+  id: "telegram"
+  description: "Cloud-based instant messaging platform"
+  icon: "https://telegram.org/favicon.ico"
+  homepage: "https://telegram.org"
+  canonical_domains:
+    - telegram.org
+    - api.telegram.org
+    - t.me
+
+oauth:
+  authorization_url: null
+  token_url: null
+  scopes: []
+
+tools:
+  - id: "telegram-send-message"
+    route:
+      method: POST
+      path: /bot{token}/sendMessage
+      types: [json]
+    semantics:
+      canonical: "send message via Telegram"
+      predicates: [send, message, text, write, notify, ping, contact]
+      objects: [message, text, notification, update, announcement]
+      contexts: [messaging, instant messaging, notifications, alerts, bot communication]
+      not: [send photo, send document, edit message]
+    params:
+      chat_id:
+        type: string
+        required: true
+        description: "Chat ID or @username"
+      text:
+        type: string
+        required: true
+        description: "Message text"
+      parse_mode:
+        type: string
+        required: false
+        description: "Parse mode (Markdown, HTML)"
+      disable_notification:
+        type: boolean
+        required: false
+        description: "Send silently"
+
+  - id: "telegram-send-photo"
+    route:
+      method: POST
+      path: /bot{token}/sendPhoto
+      types: [json, multipart]
+    semantics:
+      canonical: "send photo via Telegram"
+      predicates: [send, share, post, upload]
+      objects: [photo, image, picture, screenshot, pic]
+      contexts: [media sharing, image messaging]
+      not: [send message, send document]
+    params:
+      chat_id:
+        type: string
+        required: true
+        description: "Chat ID or @username"
+      photo:
+        type: file
+        required: true
+        description: "Photo file or URL"
+      caption:
+        type: string
+        required: false
+        description: "Photo caption"
+
+  - id: "telegram-send-document"
+    route:
+      method: POST
+      path: /bot{token}/sendDocument
+      types: [json, multipart]
+    semantics:
+      canonical: "send document via Telegram"
+      predicates: [send, share, upload, attach]
+      objects: [document, file, attachment, pdf, doc]
+      contexts: [file sharing, document transfer]
+      not: [send message, send photo]
+    params:
+      chat_id:
+        type: string
+        required: true
+        description: "Chat ID or @username"
+      document:
+        type: file
+        required: true
+        description: "Document file"
+      caption:
+        type: string
+        required: false
+        description: "Document caption"
+
+  - id: "telegram-get-updates"
+    route:
+      method: GET
+      path: /bot{token}/getUpdates
+      types: [json]
+    semantics:
+      canonical: "get updates from Telegram bot"
+      predicates: [get, fetch, check, poll, receive, read]
+      objects: [updates, messages, notifications, incoming]
+      contexts: [bot polling, message receiving]
+      not: [send message, webhook]
+    params:
+      offset:
+        type: integer
+        required: false
+        description: "Update offset"
+      limit:
+        type: integer
+        required: false
+        description: "Max updates to retrieve (1-100)"
+      timeout:
+        type: integer
+        required: false
+        description: "Long polling timeout in seconds"

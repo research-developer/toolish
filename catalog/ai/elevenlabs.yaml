@@ -1,0 +1,75 @@
+service:
+  name: "ElevenLabs"
+  id: "elevenlabs"
+  description: "AI voice generation and text-to-speech"
+  icon: "https://elevenlabs.io/favicon.ico"
+  homepage: "https://elevenlabs.io"
+  canonical_domains:
+    - api.elevenlabs.io
+
+oauth:
+  authorization_url: null
+  token_url: null
+  scopes: []
+
+tools:
+  - id: "elevenlabs-text-to-speech"
+    route:
+      method: POST
+      path: /text-to-speech/{voice_id}
+      types: [audio/mpeg]
+    semantics:
+      canonical: "generate speech from text with ElevenLabs"
+      predicates: [speak, say, generate, convert, synthesize, vocalize]
+      objects: [speech, audio, voice, sound, narration]
+      contexts: [text-to-speech, voice synthesis, audio generation, tts]
+      not: [transcribe, recognize speech]
+    params:
+      voice_id:
+        type: string
+        required: true
+        description: "Voice ID to use"
+      text:
+        type: string
+        required: true
+        description: "Text to convert to speech"
+      model_id:
+        type: string
+        required: false
+        description: "TTS model (eleven_monolingual_v1, eleven_multilingual_v2)"
+
+  - id: "elevenlabs-list-voices"
+    route:
+      method: GET
+      path: /voices
+      types: [json]
+    semantics:
+      canonical: "list available ElevenLabs voices"
+      predicates: [list, browse, show, get, find]
+      objects: [voices, speakers, personas]
+      contexts: [voice selection, catalog browsing]
+    params: {}
+
+  - id: "elevenlabs-clone-voice"
+    route:
+      method: POST
+      path: /voices/add
+      types: [json]
+    semantics:
+      canonical: "create custom voice clone with ElevenLabs"
+      predicates: [clone, create, add, make, generate]
+      objects: [voice, clone, persona, speaker]
+      contexts: [voice cloning, custom voices, personalization]
+    params:
+      name:
+        type: string
+        required: true
+        description: "Name for the cloned voice"
+      files:
+        type: array
+        required: true
+        description: "Audio samples for voice cloning"
+      description:
+        type: string
+        required: false
+        description: "Voice description"

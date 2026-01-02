@@ -1,0 +1,140 @@
+service:
+  name: "Asana"
+  id: "asana"
+  description: "Work management and project collaboration platform"
+  icon: "https://asana.com/favicon.ico"
+  homepage: "https://asana.com"
+  canonical_domains:
+    - app.asana.com
+    - api.asana.com
+
+oauth:
+  authorization_url: "https://app.asana.com/-/oauth_authorize"
+  token_url: "https://app.asana.com/-/oauth_token"
+  scopes:
+    - "default"
+
+tools:
+  - id: "asana-create-task"
+    route:
+      method: POST
+      path: /tasks
+      types: [json]
+    semantics:
+      canonical: "create task in Asana"
+      predicates: [create, add, make, new, assign, schedule]
+      objects: [task, todo, item, action item, work item, assignment]
+      contexts: [project management, task management, work tracking, productivity]
+      not: [update task, delete task, list tasks]
+    params:
+      name:
+        type: string
+        required: true
+        description: "Task name"
+      notes:
+        type: string
+        required: false
+        description: "Task description"
+      workspace:
+        type: string
+        required: true
+        description: "Workspace GID"
+      projects:
+        type: array
+        required: false
+        description: "Project GIDs to add task to"
+      assignee:
+        type: string
+        required: false
+        description: "Assignee GID or email"
+      due_on:
+        type: string
+        required: false
+        description: "Due date (YYYY-MM-DD)"
+
+  - id: "asana-list-tasks"
+    route:
+      method: GET
+      path: /tasks
+      types: [json]
+    semantics:
+      canonical: "list tasks from Asana"
+      predicates: [list, get, fetch, find, search, show, view, check]
+      objects: [tasks, todos, items, work items, assignments, backlog]
+      contexts: [project management, task tracking, productivity]
+      not: [create task, update task]
+    params:
+      project:
+        type: string
+        required: false
+        description: "Project GID to filter by"
+      assignee:
+        type: string
+        required: false
+        description: "Assignee GID or 'me'"
+      workspace:
+        type: string
+        required: false
+        description: "Workspace GID"
+      completed_since:
+        type: string
+        required: false
+        description: "Filter completed tasks since date"
+
+  - id: "asana-update-task"
+    route:
+      method: PUT
+      path: /tasks/{task_gid}
+      types: [json]
+    semantics:
+      canonical: "update task in Asana"
+      predicates: [update, modify, change, edit, complete, mark, assign]
+      objects: [task, todo, status, assignee, due date, progress]
+      contexts: [project management, task tracking, workflow]
+      not: [create task, delete task]
+    params:
+      task_gid:
+        type: string
+        required: true
+        description: "Task GID"
+      name:
+        type: string
+        required: false
+        description: "New task name"
+      completed:
+        type: boolean
+        required: false
+        description: "Mark task as complete"
+      assignee:
+        type: string
+        required: false
+        description: "New assignee"
+      due_on:
+        type: string
+        required: false
+        description: "New due date"
+
+  - id: "asana-list-projects"
+    route:
+      method: GET
+      path: /projects
+      types: [json]
+    semantics:
+      canonical: "list projects from Asana"
+      predicates: [list, get, fetch, find, show, view]
+      objects: [projects, boards, workspaces, portfolios]
+      contexts: [project management, organization, planning]
+      not: [create project, list tasks]
+    params:
+      workspace:
+        type: string
+        required: true
+        description: "Workspace GID"
+      team:
+        type: string
+        required: false
+        description: "Team GID to filter by"
+      archived:
+        type: boolean
+        required: false
+        description: "Include archived projects"

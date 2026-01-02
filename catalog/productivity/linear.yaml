@@ -1,0 +1,131 @@
+service:
+  name: "Linear"
+  id: "linear"
+  description: "Modern issue tracking and project management"
+  icon: "https://linear.app/favicon.ico"
+  homepage: "https://linear.app"
+  canonical_domains:
+    - api.linear.app
+    - linear.app
+
+oauth:
+  authorization_url: "https://linear.app/oauth/authorize"
+  token_url: "https://api.linear.app/oauth/token"
+  scopes:
+    - "read"
+    - "write"
+    - "issues:create"
+    - "comments:create"
+
+tools:
+  - id: "linear-create-issue"
+    route:
+      method: POST
+      path: /issues
+      types: [json]
+    semantics:
+      canonical: "create issue in Linear"
+      predicates: [create, add, file, open, report, submit, log]
+      objects: [issue, bug, task, ticket, item, problem, feature request]
+      contexts: [project management, issue tracking, bug tracking, agile, sprint]
+      not: [update issue, delete issue, list issues]
+    params:
+      title:
+        type: string
+        required: true
+        description: "Issue title"
+      description:
+        type: string
+        required: false
+        description: "Issue description (markdown supported)"
+      teamId:
+        type: string
+        required: true
+        description: "Team ID to create issue in"
+      priority:
+        type: integer
+        required: false
+        description: "Priority (0=none, 1=urgent, 2=high, 3=medium, 4=low)"
+      labelIds:
+        type: array
+        required: false
+        description: "Label IDs to apply"
+
+  - id: "linear-list-issues"
+    route:
+      method: GET
+      path: /issues
+      types: [json]
+    semantics:
+      canonical: "list issues from Linear"
+      predicates: [list, get, fetch, find, search, show, view, check]
+      objects: [issues, bugs, tasks, tickets, items, backlog]
+      contexts: [project management, issue tracking, sprint planning]
+      not: [create issue, update issue]
+    params:
+      teamId:
+        type: string
+        required: false
+        description: "Filter by team ID"
+      assigneeId:
+        type: string
+        required: false
+        description: "Filter by assignee"
+      state:
+        type: string
+        required: false
+        description: "Filter by state (backlog, todo, in_progress, done)"
+
+  - id: "linear-update-issue"
+    route:
+      method: PATCH
+      path: /issues/{id}
+      types: [json]
+    semantics:
+      canonical: "update issue in Linear"
+      predicates: [update, modify, change, edit, fix, move, assign, reassign]
+      objects: [issue, bug, task, ticket, status, priority, assignee]
+      contexts: [project management, issue tracking, workflow]
+      not: [create issue, delete issue]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Issue ID"
+      title:
+        type: string
+        required: false
+        description: "New title"
+      stateId:
+        type: string
+        required: false
+        description: "New state ID"
+      assigneeId:
+        type: string
+        required: false
+        description: "New assignee ID"
+      priority:
+        type: integer
+        required: false
+        description: "New priority"
+
+  - id: "linear-add-comment"
+    route:
+      method: POST
+      path: /issues/{issueId}/comments
+      types: [json]
+    semantics:
+      canonical: "add comment to Linear issue"
+      predicates: [comment, reply, respond, note, add]
+      objects: [comment, note, reply, response, update]
+      contexts: [issue discussion, collaboration, feedback]
+      not: [create issue, update issue]
+    params:
+      issueId:
+        type: string
+        required: true
+        description: "Issue ID to comment on"
+      body:
+        type: string
+        required: true
+        description: "Comment body (markdown supported)"

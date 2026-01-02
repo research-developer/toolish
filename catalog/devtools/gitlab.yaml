@@ -1,0 +1,169 @@
+service:
+  name: "GitLab"
+  id: "gitlab"
+  description: "DevOps platform for source control, CI/CD, and collaboration"
+  icon: "https://gitlab.com/favicon.ico"
+  homepage: "https://gitlab.com"
+  canonical_domains:
+    - gitlab.com
+    - gitlab.io
+
+oauth:
+  authorization_url: "https://gitlab.com/oauth/authorize"
+  token_url: "https://gitlab.com/oauth/token"
+  scopes:
+    - "api"
+    - "read_api"
+    - "read_user"
+    - "read_repository"
+    - "write_repository"
+
+tools:
+  - id: "gitlab-create-issue"
+    route:
+      method: POST
+      path: /projects/{id}/issues
+      types: [json]
+    semantics:
+      canonical: "create issue in GitLab"
+      predicates: [create, add, file, open, report, submit, log]
+      objects: [issue, bug, task, ticket, problem, feature request]
+      contexts: [issue tracking, project management, bug tracking, devops]
+      not: [create merge request, update issue]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Project ID or URL-encoded path"
+      title:
+        type: string
+        required: true
+        description: "Issue title"
+      description:
+        type: string
+        required: false
+        description: "Issue description (markdown)"
+      labels:
+        type: string
+        required: false
+        description: "Comma-separated label names"
+      assignee_ids:
+        type: array
+        required: false
+        description: "User IDs to assign"
+
+  - id: "gitlab-list-issues"
+    route:
+      method: GET
+      path: /projects/{id}/issues
+      types: [json]
+    semantics:
+      canonical: "list issues from GitLab project"
+      predicates: [list, get, fetch, find, search, show, view]
+      objects: [issues, bugs, tasks, tickets, backlog]
+      contexts: [issue tracking, project management]
+      not: [create issue, list merge requests]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Project ID or URL-encoded path"
+      state:
+        type: string
+        required: false
+        description: "Issue state (opened, closed, all)"
+      labels:
+        type: string
+        required: false
+        description: "Filter by labels"
+      assignee_id:
+        type: integer
+        required: false
+        description: "Filter by assignee"
+
+  - id: "gitlab-create-merge-request"
+    route:
+      method: POST
+      path: /projects/{id}/merge_requests
+      types: [json]
+    semantics:
+      canonical: "create merge request in GitLab"
+      predicates: [create, open, submit, propose, request]
+      objects: [merge request, mr, pull request, pr, code review]
+      contexts: [code review, git workflow, collaboration, devops]
+      not: [create issue, merge]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Project ID or URL-encoded path"
+      source_branch:
+        type: string
+        required: true
+        description: "Source branch name"
+      target_branch:
+        type: string
+        required: true
+        description: "Target branch name"
+      title:
+        type: string
+        required: true
+        description: "MR title"
+      description:
+        type: string
+        required: false
+        description: "MR description"
+      assignee_id:
+        type: integer
+        required: false
+        description: "Assignee user ID"
+
+  - id: "gitlab-list-merge-requests"
+    route:
+      method: GET
+      path: /projects/{id}/merge_requests
+      types: [json]
+    semantics:
+      canonical: "list merge requests from GitLab"
+      predicates: [list, get, fetch, find, show, view, check]
+      objects: [merge requests, mrs, pull requests, prs, reviews]
+      contexts: [code review, git workflow]
+      not: [create merge request, list issues]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Project ID or URL-encoded path"
+      state:
+        type: string
+        required: false
+        description: "MR state (opened, closed, merged, all)"
+      author_id:
+        type: integer
+        required: false
+        description: "Filter by author"
+
+  - id: "gitlab-trigger-pipeline"
+    route:
+      method: POST
+      path: /projects/{id}/pipeline
+      types: [json]
+    semantics:
+      canonical: "trigger CI/CD pipeline in GitLab"
+      predicates: [trigger, run, start, execute, deploy, build]
+      objects: [pipeline, ci, cd, build, deployment, job]
+      contexts: [ci/cd, devops, automation, deployment]
+      not: [cancel pipeline, list pipelines]
+    params:
+      id:
+        type: string
+        required: true
+        description: "Project ID or URL-encoded path"
+      ref:
+        type: string
+        required: true
+        description: "Branch or tag to run pipeline on"
+      variables:
+        type: array
+        required: false
+        description: "Pipeline variables"

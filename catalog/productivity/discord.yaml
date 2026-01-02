@@ -1,0 +1,111 @@
+service:
+  name: "Discord"
+  id: "discord"
+  description: "Communication platform for communities and teams"
+  icon: "https://discord.com/assets/favicon.ico"
+  homepage: "https://discord.com"
+  canonical_domains:
+    - discord.com
+    - discordapp.com
+
+oauth:
+  authorization_url: "https://discord.com/api/oauth2/authorize"
+  token_url: "https://discord.com/api/oauth2/token"
+  scopes:
+    - "bot"
+    - "messages.read"
+    - "messages.write"
+    - "guilds"
+
+tools:
+  - id: "discord-send-message"
+    route:
+      method: POST
+      path: /channels/{channel_id}/messages
+      types: [json]
+    semantics:
+      canonical: "send message to Discord channel"
+      predicates: [send, post, message, write, say, announce, broadcast, notify]
+      objects: [message, announcement, notification, text, update]
+      contexts: [team communication, community, gaming, server messaging]
+      not: [edit message, delete message, dm user]
+    params:
+      channel_id:
+        type: string
+        required: true
+        description: "Channel ID to send message to"
+      content:
+        type: string
+        required: true
+        description: "Message content"
+      embeds:
+        type: array
+        required: false
+        description: "Rich embed objects"
+      tts:
+        type: boolean
+        required: false
+        description: "Text-to-speech message"
+
+  - id: "discord-send-dm"
+    route:
+      method: POST
+      path: /users/@me/channels
+      types: [json]
+    semantics:
+      canonical: "send direct message on Discord"
+      predicates: [dm, message, send, ping, contact, reach]
+      objects: [dm, direct message, private message, pm]
+      contexts: [private messaging, direct communication]
+      not: [send channel message, broadcast]
+    params:
+      recipient_id:
+        type: string
+        required: true
+        description: "User ID to DM"
+      content:
+        type: string
+        required: true
+        description: "Message content"
+
+  - id: "discord-list-channels"
+    route:
+      method: GET
+      path: /guilds/{guild_id}/channels
+      types: [json]
+    semantics:
+      canonical: "list Discord server channels"
+      predicates: [list, get, fetch, find, show, view]
+      objects: [channels, rooms, categories, voice channels]
+      contexts: [server management, navigation]
+      not: [create channel, send message]
+    params:
+      guild_id:
+        type: string
+        required: true
+        description: "Server/Guild ID"
+
+  - id: "discord-create-thread"
+    route:
+      method: POST
+      path: /channels/{channel_id}/threads
+      types: [json]
+    semantics:
+      canonical: "create thread in Discord channel"
+      predicates: [create, start, open, begin, spawn]
+      objects: [thread, discussion, conversation, topic]
+      contexts: [organized discussions, threads, conversations]
+      not: [send message, delete thread]
+    params:
+      channel_id:
+        type: string
+        required: true
+        description: "Channel ID to create thread in"
+      name:
+        type: string
+        required: true
+        description: "Thread name"
+      auto_archive_duration:
+        type: integer
+        required: false
+        description: "Auto-archive duration in minutes (60, 1440, 4320, 10080)"

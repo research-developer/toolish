@@ -1,0 +1,68 @@
+service:
+  name: "Anthropic"
+  id: "anthropic"
+  description: "Claude AI models for safe, helpful conversations"
+  icon: "https://anthropic.com/favicon.ico"
+  homepage: "https://anthropic.com"
+  canonical_domains:
+    - api.anthropic.com
+
+oauth:
+  authorization_url: null
+  token_url: null
+  scopes: []
+
+tools:
+  - id: "anthropic-messages"
+    route:
+      method: POST
+      path: /messages
+      types: [json]
+    semantics:
+      canonical: "generate response with Claude"
+      predicates: [generate, ask, chat, prompt, query, converse, message]
+      objects: [message, response, text, answer, completion, conversation]
+      contexts: [ai generation, language model, chatbot, assistant]
+      not: [embed text, create image]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Model ID (claude-3-opus, claude-3-sonnet, claude-3-haiku)"
+      messages:
+        type: array
+        required: true
+        description: "Conversation messages array"
+      max_tokens:
+        type: integer
+        required: true
+        description: "Maximum tokens to generate"
+      temperature:
+        type: number
+        required: false
+        description: "Sampling temperature (0-1)"
+
+  - id: "anthropic-streaming"
+    route:
+      method: POST
+      path: /messages
+      types: [json, stream]
+    semantics:
+      canonical: "stream Claude response in real-time"
+      predicates: [stream, generate, chat, prompt]
+      objects: [stream, response, text, tokens]
+      contexts: [real-time, streaming, interactive]
+      not: [batch process]
+    params:
+      model:
+        type: string
+        required: true
+        description: "Model ID"
+      messages:
+        type: array
+        required: true
+        description: "Conversation messages"
+      stream:
+        type: boolean
+        required: true
+        description: "Enable streaming (must be true)"
